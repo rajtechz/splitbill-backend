@@ -1,0 +1,625 @@
+{
+  "info": {
+    "name": "SplitMate REST API Collection",
+    "_postman_id": "splitmate-api-v1-collection",
+    "description": "Complete, production-ready Postman collection for SplitMate expense sharing REST API. Includes automatic JWT token management, 4-digit mPIN & biometrics, contacts sync, dynamic debt calculations, and third-party mock fallbacks (OTP & push notifications).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "mock_jwt_token_dev",
+      "type": "string"
+    },
+    {
+      "key": "otp",
+      "value": "123456",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. Health & Server Ping",
+      "item": [
+        {
+          "name": "Health Check (Root)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Health Check (API v1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication & Security",
+      "item": [
+        {
+          "name": "Login (Auto-captures Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.data && jsonData.data.tokens) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.tokens.accessToken);",
+                  "    console.log('JWT Token saved automatically:', jsonData.data.tokens.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alex.johnson@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Register New User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sameer Khan\",\n  \"email\": \"sameer.khan@example.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"+91 98999 11223\",\n  \"defaultCurrency\": \"INR\",\n  \"country\": \"IN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Send OTP (Generates OTP in Response)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.data && jsonData.data.otp) {",
+                  "    pm.collectionVariables.set('otp', jsonData.data.otp);",
+                  "    console.log('Generated OTP saved to variable {{otp}}:', jsonData.data.otp);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"+91 98765 43210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/otp/send",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "otp", "send"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP (Uses Auto-Generated {{otp}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.data && jsonData.data.tokens) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.tokens.accessToken);",
+                  "    console.log('JWT Token saved automatically on OTP verify:', jsonData.data.tokens.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"+91 98765 43210\",\n  \"otp\": \"{{otp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/otp/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "otp", "verify"]
+            }
+          }
+        },
+        {
+          "name": "Setup 4-Digit mPIN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pin\": \"5678\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/mpin/setup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "mpin", "setup"]
+            }
+          }
+        },
+        {
+          "name": "Verify 4-Digit mPIN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pin\": \"5678\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/mpin/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "mpin", "verify"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Biometrics",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/mpin/toggle-biometrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "mpin", "toggle-biometrics"]
+            }
+          }
+        },
+        {
+          "name": "Get Security Settings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auth/security",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "security"]
+            }
+          }
+        },
+        {
+          "name": "Logout (Revoke Session)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Users & Contacts",
+      "item": [
+        {
+          "name": "Get My Profile (/users/me)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alex Johnson\",\n  \"upiId\": \"alex.johnson@okhdfcbank\",\n  \"defaultCurrency\": \"INR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Sync Device Contacts (Match Registered Users)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contacts\": [\n    {\n      \"name\": \"Priya Sharma\",\n      \"phoneNumber\": \"+91 98111 22334\",\n      \"email\": \"priya.s@example.com\"\n    },\n    {\n      \"name\": \"Rahul Gandhi\",\n      \"phoneNumber\": \"+91 99999 88888\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/sync-contacts",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "sync-contacts"]
+            }
+          }
+        },
+        {
+          "name": "Auto-Detect Currency from GPS Country",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"countryCode\": \"IN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/location-currency",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me", "location-currency"]
+            }
+          }
+        },
+        {
+          "name": "Get User Profile by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/usr_priya",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "usr_priya"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Groups",
+      "item": [
+        {
+          "name": "List All Groups",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/groups",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups"]
+            }
+          }
+        },
+        {
+          "name": "Create Group",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Manali Roadtrip 2026\",\n  \"description\": \"Cabin stays, fuel, and cafe bills\",\n  \"category\": \"Trip\",\n  \"currency\": \"INR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/groups",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups"]
+            }
+          }
+        },
+        {
+          "name": "Get Group Details (with Members & Debts)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/groups/grp_goa",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "grp_goa"]
+            }
+          }
+        },
+        {
+          "name": "Add Member to Group",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"usr_vikram\",\n  \"name\": \"Vikram Singh\",\n  \"email\": \"vikram.s@example.com\",\n  \"role\": \"member\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/groups/grp_goa/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "grp_goa", "members"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Friends",
+      "item": [
+        {
+          "name": "List All Friends (with Net Balances)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/friends",
+              "host": ["{{baseUrl}}"],
+              "path": ["friends"]
+            }
+          }
+        },
+        {
+          "name": "Add Friend",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Karan Mehra\",\n  \"email\": \"karan.m@example.com\",\n  \"phoneNumber\": \"+91 98555 66778\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/friends",
+              "host": ["{{baseUrl}}"],
+              "path": ["friends"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Expenses (Dynamic Multi-Split)",
+      "item": [
+        {
+          "name": "List All Expenses",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/expenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses"]
+            }
+          }
+        },
+        {
+          "name": "Create Expense (Equal Split + Push Alert)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Barbeque Dinner & Drinks\",\n  \"totalAmount\": 3000,\n  \"currency\": \"INR\",\n  \"category\": \"Food\",\n  \"groupId\": \"grp_goa\",\n  \"splitMethod\": \"EQUAL\",\n  \"participants\": [\n    {\n      \"userId\": \"usr_me\",\n      \"name\": \"Alex Johnson\",\n      \"paidAmount\": 3000,\n      \"shareAmount\": 1500,\n      \"netBalance\": 1500\n    },\n    {\n      \"userId\": \"usr_priya\",\n      \"name\": \"Priya Sharma\",\n      \"paidAmount\": 0,\n      \"shareAmount\": 1500,\n      \"netBalance\": -1500\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/expenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses"]
+            }
+          }
+        },
+        {
+          "name": "Get Expense by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/expenses/exp_1",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "exp_1"]
+            }
+          }
+        },
+        {
+          "name": "Add Comment to Expense",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Included 10% service tip.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/expenses/exp_1/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "exp_1", "comments"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Settlements & Payments",
+      "item": [
+        {
+          "name": "List Settlements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/settlements",
+              "host": ["{{baseUrl}}"],
+              "path": ["settlements"]
+            }
+          }
+        },
+        {
+          "name": "Record Payment / Settle Up",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payerId\": \"usr_priya\",\n  \"payerName\": \"Priya Sharma\",\n  \"receiverId\": \"usr_me\",\n  \"receiverName\": \"Alex Johnson\",\n  \"amount\": 1500,\n  \"currency\": \"INR\",\n  \"paymentMethod\": \"UPI\",\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/settlements",
+              "host": ["{{baseUrl}}"],
+              "path": ["settlements"]
+            }
+          }
+        },
+        {
+          "name": "Confirm Settlement",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/settlements/set_1/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["settlements", "set_1", "confirm"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Notifications & Activities",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "Send Test Push Notification",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Weekend Settlement Alert\",\n  \"body\": \"You have 2 pending balances to settle with Priya and Rohan.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/test-push",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "test-push"]
+            }
+          }
+        },
+        {
+          "name": "List Audit Trail & Activities",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/activities",
+              "host": ["{{baseUrl}}"],
+              "path": ["activities"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Configuration & Currencies",
+      "item": [
+        {
+          "name": "Get Supported Currencies (9 World Currencies)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/config/currencies",
+              "host": ["{{baseUrl}}"],
+              "path": ["config", "currencies"]
+            }
+          }
+        },
+        {
+          "name": "Get Currency by Country (e.g. IN, US, GB, AE)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/config/currency-by-country/IN",
+              "host": ["{{baseUrl}}"],
+              "path": ["config", "currency-by-country", "IN"]
+            }
+          }
+        },
+        {
+          "name": "Get Expense & Group Categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/config/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["config", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Get System Feature Flags",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/config/features",
+              "host": ["{{baseUrl}}"],
+              "path": ["config", "features"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
