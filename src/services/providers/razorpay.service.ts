@@ -19,8 +19,8 @@ export const PLAN_PRICING = {
     name: 'SplitMate Pro Annual Plan',
   },
   monthly: {
-    amountInPaise: 14900, // ₹149.00
-    displayAmount: '₹149',
+    amountInPaise: 19900, // ₹199.00
+    displayAmount: '₹199',
     period: 'month',
     durationDays: 30,
     name: 'SplitMate Pro Monthly Plan',
