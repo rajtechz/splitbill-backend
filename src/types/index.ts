@@ -47,6 +47,8 @@ export interface User {
   mPin?: string;
   isPinEnabled?: boolean;
   isBiometricsEnabled?: boolean;
+  subscriptionTier?: 'free' | 'pro';
+  subscriptionExpiresAt?: string;
   createdAt: string;
   updatedAt?: string;
 }

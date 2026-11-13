@@ -9,6 +9,7 @@ import activityRoutes from './activity.routes.js';
 import notificationRoutes from './notification.routes.js';
 import searchRoutes from './search.routes.js';
 import configRoutes from './config.routes.js';
+import subscriptionRoutes from './subscription.routes.js';
 import { logout } from '../controllers/auth.controller.js';
 import { optionalAuth } from '../middleware/auth.middleware.js';
 
@@ -18,6 +19,7 @@ apiRouter.use('/auth', authRoutes);
 apiRouter.post('/logout', optionalAuth, logout);
 apiRouter.get('/logout', optionalAuth, logout);
 apiRouter.use('/users', userRoutes);
+apiRouter.use('/subscriptions', subscriptionRoutes);
 apiRouter.use('/groups', groupRoutes);
 apiRouter.use('/friends', friendRoutes);
 apiRouter.use('/expenses', expenseRoutes);

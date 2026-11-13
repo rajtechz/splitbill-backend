@@ -24,6 +24,8 @@ const UserSchema = new Schema<User>(
     mPin: { type: String, default: '1234' },
     isPinEnabled: { type: Boolean, default: false },
     isBiometricsEnabled: { type: Boolean, default: false },
+    subscriptionTier: { type: String, enum: ['free', 'pro'], default: 'free' },
+    subscriptionExpiresAt: { type: String },
     createdAt: { type: String, required: true },
     updatedAt: { type: String },
   },

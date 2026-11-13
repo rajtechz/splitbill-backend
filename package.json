@@ -35,6 +35,7 @@
     "firebase-admin": "^14.5.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.12.1",
+    "razorpay": "^2.9.8",
     "typescript": "^5.7.2"
   },
   "devDependencies": {

@@ -10,5 +10,7 @@ export const config = {
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
   corsOrigin: process.env.CORS_ORIGIN || '*',
   mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/splitmate',
+  razorpayKeyId: process.env.RAZORPAY_KEY_ID || 'rzp_test_TzYOq8vZZErm5Y',
+  razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || 'ZPYghGmx4KV5I3MELBGJZb2F',
 };
 
