@@ -5,6 +5,7 @@ import {
   cancelSubscription,
   getStatus,
   getCheckoutPage,
+  getSuccessPage,
 } from '../controllers/subscription.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 
@@ -25,4 +26,8 @@ router.get('/status', requireAuth, getStatus);
 // Browser / Webview Checkout page
 router.get('/razorpay/checkout', getCheckoutPage);
 
+// Browser Success Callback page
+router.get('/razorpay/success', getSuccessPage);
+
 export default router;
+
